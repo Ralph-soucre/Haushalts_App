@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haushalts-App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Haushalts-App</h1>
+
+        <div class="list-section">
+            <h2>Einkaufsliste</h2>
+            <div class="input-group">
+                <input type="text" id="itemInput" placeholder="Artikel hinzufügen..." required>
+                <input type="number" id="quantityInput" placeholder="Menge" min="1" value="1" required>
+                <button onclick="addItem()">Hinzufügen</button>
+            </div>
+            <ul id="itemList" class="item-list"></ul>
+        </div>
+
+        <div class="list-section">
+            <h2>To-Do-Liste</h2>
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="Aufgabe hinzufügen..." required>
+                <button onclick="addTask()">Hinzufügen</button>
+            </div>
+            <ul id="taskList" class="item-list"></ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
