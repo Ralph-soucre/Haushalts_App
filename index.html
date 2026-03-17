@@ -3,36 +3,73 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haushalts-App</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Einkaufsliste</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        var socket = io();
+
+        // Empfangene Nachrichten verarbeiten
+        socket.on('item_added', function (data) {
+            const itemList = document.getElementById('item-list');
+            const newItem = document.createElement('li');
+            newItem.textContent = data.item + ' (hinzugefügt von ' + data.user + ')';
+            itemList.appendChild(newItem);
+        });
+
+        socket.on('item_deleted', function (data) {
+            const itemList = document.getElementById('item-list');
+            const itemToRemove = document.getElementById('item-' + data.item_id);
+            if (itemToRemove) {
+                itemList.removeChild(itemToRemove);
+            }
+        });
+    </script>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Haushalts-App</h1>
+    <h1>Einkaufsliste</h1>
+    <ul id="item-list">
+        {% for item in einkaufsliste %}
+        <li id="item-{{ item.id }}">{{ item.item }} <a href="{{ url_for('delete_item', item_id=item.id) }}">Löschen</a>
+        </li>
+        {% endfor %}
+    </ul>
+    <form action="{{ url_for('add_item') }}" method="post">
+        <input type="text" name="item" required>
+        <button type="submit">Hinzufügen</button>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
 
-        <div class="list-section">
-            <h2>Einkaufsliste</h2>
-            <div class="input-group">
-                <input type="text" id="itemInput" placeholder="Artikel hinzufügen..." required>
-                <input type="number" id="quantityInput" placeholder="Menge" min="1" value="1" required>
-                <button onclick="addItem()">Hinzufügen</button>
-            </div>
-            <ul id="itemList" class="item-list"></ul>
-        </div>
+        <script>
+            const socket = io();
 
-        <div class="list-section">
-            <h2>To-Do-Liste</h2>
-            <div class="input-group">
-                <input type="text" id="taskInput" placeholder="Aufgabe hinzufügen..." required>
-                <button onclick="addTask()">Hinzufügen</button>
-            </div>
-            <ul id="taskList" class="item-list"></ul>
-        </div>
-    </div>
+            socket.on('item_added', (data) => {
+                const li = document.createElement('li');
+                li.id = `item-${data.id}`;
+                li.textContent = `${data.item} (hinzugefügt von ${data.user})`;
+                const deleteLink = document.createElement('a');
+                deleteLink.href = `/delete/${data.id}`;
+                deleteLink.textContent = " Löschen";
+                li.appendChild(deleteLink);
+                document.getElementById('einkaufsliste').appendChild(li);
+            });
 
-    <script src="script.js"></script>
+            socket.on('item_deleted', (data) => {
+                const itemToDelete = document.getElementById(`item-${data.item_id}`);
+                if (itemToDelete) {
+                    itemToDelete.remove();
+                }
+            });
+
+            document.getElementById('addItemForm').onsubmit = function () {
+                const itemInput = this.querySelector('input[name="item"]');
+                const item = itemInput.value;
+                socket.emit('add_item', { item: item });  // Sendet die Eingaben an den Server
+                itemInput.value = ''; // Eingabefeld zurücksetzen
+                return false; // Verhindert die normale Formularübermittlung
+            };
+        </script>
+
+    </form>
 </body>
 
 </html>
